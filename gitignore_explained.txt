@@ -1,0 +1,26 @@
+MoodFlix Gitignore Info (Simple Hinglish Explanation)
+
+Bhai, is project ke .gitignore file mein ye saari cheezein hain jo GitHub par push nahi hongi:
+
+1. API Keys aur Secrets (.env, .env.*): 
+   Sabse zaroori! Aapki TMDB API key aur baaki private keys isme aati hain. Ye file GitHub par nahi jayegi, taaki aapka account safe rahe.
+
+2. Large Data Files (*.csv): 
+   Jo movies ka bada data humne TMDB se download kiya hai (jaise movies_cleaned.csv), wo size mein bahut bada hota hai, isliye use ignore kiya gaya hai.
+
+3. AI Model Files (*.pkl, *.h5): 
+   AI ke trained models binary files hote hain aur unka size bhi kaafi zyada hota hai, isliye wo bhi GitHub par nahi jayenge.
+
+4. node_modules: 
+   Ye folder libraries aur packages ka hota hai. Inhe hum 'npm install' karke wapas la sakte hain, isliye inka GitHub par hona zaroori nahi hai.
+
+5. Build Folders (dist, dist-ssr): 
+   Jab hum project build karte hain, tab ye folders bante hain. Inhe bhi hum har baar naye se generate kar sakte hain.
+
+6. Lovable Settings (.lovable/): 
+   Purane platform (Lovable) ki configurations aur settings ko ignore kar diya gaya hai taaki naya setup clean rahe.
+
+7. Editor aur System Files (.vscode, .idea, .DS_Store): 
+   Aapke code editor (VS Code) ki personal settings aur system ki temporary files bhi ignored hain.
+
+Summary: Iska fayda ye hai ki aapka GitHub repository ekdum clean rahega aur koi bhi sensitive information (jaise API keys) leak nahi hogi!
