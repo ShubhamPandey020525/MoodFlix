@@ -1,26 +1,29 @@
-MoodFlix Gitignore Info (Simple Hinglish Explanation)
+MoodFlix - Gitignore Reference (Personal Notes)
 
-Bhai, is project ke .gitignore file mein ye saari cheezein hain jo GitHub par push nahi hongi:
+I have updated the .gitignore to keep the repo clean and professional. Here is a quick breakdown for future reference:
 
-1. API Keys aur Secrets (.env, .env.*): 
-   Sabse zaroori! Aapki TMDB API key aur baaki private keys isme aati hain. Ye file GitHub par nahi jayegi, taaki aapka account safe rahe.
+1. Sensitive Info (.env, .env.*)
+   - TMDB API keys aur secrets isi mein hain.
+   - Most important point: Inhe kabhi public mat karna, isliye ye ignored hain.
 
-2. Large Data Files (*.csv): 
-   Jo movies ka bada data humne TMDB se download kiya hai (jaise movies_cleaned.csv), wo size mein bahut bada hota hai, isliye use ignore kiya gaya hai.
+2. Data & Datasets (*.csv)
+   - Large movie datasets (like movies_cleaned.csv) ignored hain.
+   - GitHub par badi files se bachne ke liye ye zaroori hai.
 
-3. AI Model Files (*.pkl, *.h5): 
-   AI ke trained models binary files hote hain aur unka size bhi kaafi zyada hota hai, isliye wo bhi GitHub par nahi jayenge.
+3. AI Models (*.pkl, *.h5)
+   - Trained AI models binary format mein hote hain aur kaafi space lete hain.
+   - Ye files bhi ignored hain for better repo management.
 
-4. node_modules: 
-   Ye folder libraries aur packages ka hota hai. Inhe hum 'npm install' karke wapas la sakte hain, isliye inka GitHub par hona zaroori nahi hai.
+4. Dependencies (node_modules)
+   - Standard practice: Libraries ko 'npm install' se wapas laya ja sakta hai, so no need to push.
 
-5. Build Folders (dist, dist-ssr): 
-   Jab hum project build karte hain, tab ye folders bante hain. Inhe bhi hum har baar naye se generate kar sakte hain.
+5. Build Output (dist, dist-ssr)
+   - Production-ready files hain jo build command se generate hoti hain.
 
-6. Lovable Settings (.lovable/): 
-   Purane platform (Lovable) ki configurations aur settings ko ignore kar diya gaya hai taaki naya setup clean rahe.
+6. Legacy Configs (.lovable/)
+   - Purane tool ki configurations hain, naye setup mein inki zaroorat nahi hai.
 
-7. Editor aur System Files (.vscode, .idea, .DS_Store): 
-   Aapke code editor (VS Code) ki personal settings aur system ki temporary files bhi ignored hain.
+7. System/Editor Files (.vscode, .DS_Store)
+   - Editor settings aur OS temporary files ignored hain to keep the workspace professional.
 
-Summary: Iska fayda ye hai ki aapka GitHub repository ekdum clean rahega aur koi bhi sensitive information (jaise API keys) leak nahi hogi!
+Summary: Everything is set up to protect my API keys and keep the repository lightweight.
