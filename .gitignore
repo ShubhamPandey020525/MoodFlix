@@ -11,6 +11,16 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.*
+
+# Large files
+*.csv
+*.pkl
+*.h5
+
+# Lovable
+.lovable/
 
 # Editor directories and files
 .vscode/*

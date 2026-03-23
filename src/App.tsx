@@ -12,6 +12,7 @@ import Watchlist from "./pages/Watchlist";
 import MovieDetails from "./pages/MovieDetails";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import StarryBackground from "./components/StarryBackground";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <WatchlistProvider>
+        <StarryBackground />
         <Toaster />
         <Sonner />
         <BrowserRouter>

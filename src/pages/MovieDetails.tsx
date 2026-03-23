@@ -74,7 +74,7 @@ export default function MovieDetails() {
               src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
               alt={movie.title}
               className="w-full rounded-2xl shadow-2xl shadow-primary/10"
-              onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
+              onError={(e) => { (e.target as HTMLImageElement).src = "https://placehold.co/400x600?text=No+Poster"; }}
             />
           </div>
 

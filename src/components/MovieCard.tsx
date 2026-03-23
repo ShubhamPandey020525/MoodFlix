@@ -26,7 +26,7 @@ export default function MovieCard({ movie, index = 0 }: MovieCardProps) {
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           loading="lazy"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = "/placeholder.svg";
+            (e.target as HTMLImageElement).src = "https://placehold.co/400x600?text=No+Poster";
           }}
         />
         {/* Overlay on hover */}

@@ -29,7 +29,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link to="/dashboard" className="flex items-center gap-2 shrink-0">
-          <img src={logo} alt="MoodFlix" className="h-8" />
+          <img src={logo} alt="MoodFlix" className="h-14 md:h-16" />
         </Link>
 
         {/* Search - desktop */}
@@ -63,7 +63,7 @@ export default function Navbar() {
                     src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
                     alt={movie.title}
                     className="w-8 h-12 rounded object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
+                    onError={(e) => { (e.target as HTMLImageElement).src = "https://placehold.co/400x600?text=No+Poster"; }}
                   />
                   <div>
                     <p className="text-sm font-medium text-foreground">{movie.title}</p>

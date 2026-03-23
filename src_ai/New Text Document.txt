@@ -1,0 +1,75 @@
+content based + rating filtering recommendation system
+
+Dataset : https://www.kaggle.com/datasets/asaniczka/tmdb-movies-dataset-2023-930k-movies?resource=download
+
+
+MoodFlix
+│
+├── data
+│   └── movies_cleaned.csv
+│
+├── src
+│   ├── build_vectors.py
+│   ├── compute_similarity.py
+│   ├── recommender.py
+│
+├── models
+│   ├── movies.pkl
+│   └── similarity.pkl
+│
+├── app
+│   └── app.py
+│
+└── requirements.txt
+
+
+CSV dataset
+↓
+load with pandas
+↓
+EDA
+↓
+data cleaning
+↓
+feature engineering (tags)
+↓
+vectorization (TF-IDF)
+↓
+cosine similarity
+↓
+recommendation function
+↓
+save model
+
+
+                 User movie
+                     │
+         ┌───────────┴───────────┐
+         │                       │
+dataset me hai            dataset me nahi
+         │                       │
+movies.pkl                vectorizer.pkl
+         │                       │
+similarity.pkl            vectors.pkl
+         │                       │
+top recommendations       cosine similarity
+         │                       │
+             movies.pkl → titles
+
+             User movie
+     │
+     ├─ dataset me hai
+     │      ↓
+     │  similarity.pkl
+     │
+     └─ dataset me nahi
+            ↓
+        TMDB API
+            ↓
+      overview + genres
+            ↓
+        tags create
+            ↓
+       vectorizer.pkl
+            ↓
+       cosine similarity

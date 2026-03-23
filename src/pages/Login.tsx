@@ -21,7 +21,7 @@ export default function Login() {
 
       <div className="glass-card w-full max-w-md p-8 relative z-10 animate-scale-in">
         <div className="text-center mb-8">
-          <img src={logo} alt="MoodFlix" className="h-8 mx-auto mb-6" />
+          <img src={logo} alt="MoodFlix" className="h-24 mx-auto mb-6 drop-shadow-[0_0_25px_rgba(var(--primary),0.5)]" />
           <h1 className="font-heading text-2xl font-bold text-foreground">Welcome back</h1>
           <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
         </div>
