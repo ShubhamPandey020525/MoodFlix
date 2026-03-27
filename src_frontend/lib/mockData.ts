@@ -8,6 +8,8 @@ export interface Movie {
   description: string;
   keywords: string[];
   mood: string[];
+  imdb_id?: string;
+  trailer_url?: string;
 }
 
 export const movies: Movie[] = [

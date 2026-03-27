@@ -85,7 +85,9 @@ def format_movie_record(movie_data, idx=0):
             "year": int(movie_data.get("year", 0)) if pd_notnull(movie_data.get("year")) else 0,
             "description": str(movie_data.get("overview", movie_data.get("description", ""))),
             "keywords": to_list(movie_data.get("keywords")),
-            "mood": to_list(movie_data.get("mood"))
+            "mood": to_list(movie_data.get("mood")),
+            "imdb_id": str(movie_data.get("imdb_id")) if pd_notnull(movie_data.get("imdb_id")) else None,
+            "trailer_url": str(movie_data.get("trailer_url")) if pd_notnull(movie_data.get("trailer_url")) else None
         }
     except Exception as e:
         print(f"[RECO] Formatting error for {movie_data.get('title')}: {e}")
@@ -133,18 +135,46 @@ async def fetch_metadata_tmdb_async(movie_title, year=None):
             return {"genres": "", "overview": movie_title, "poster_path": None}
         
         match = results[0]
+        movie_id = match.get("id")
+        
+        # Fetch extra details (IMDb ID and Trailers)
+        imdb_id = None
+        trailer_url = None
+        
+        if movie_id:
+            try:
+                # Get external IDs for IMDb
+                ext_url = f"https://api.themoviedb.org/3/movie/{movie_id}/external_ids"
+                ext_r = await client.get(ext_url, params={"api_key": TMDB_API_KEY}, timeout=5)
+                if ext_r.status_code == 200:
+                    imdb_id = ext_r.json().get("imdb_id")
+                
+                # Get videos for Trailer
+                vid_url = f"https://api.themoviedb.org/3/movie/{movie_id}/videos"
+                vid_r = await client.get(vid_url, params={"api_key": TMDB_API_KEY}, timeout=5)
+                if vid_r.status_code == 200:
+                    videos = vid_r.json().get("results", [])
+                    # Look for YouTube Trailer
+                    trailer = next((v for v in videos if v["site"] == "YouTube" and v["type"] == "Trailer"), None)
+                    if trailer:
+                        trailer_url = f"https://www.youtube.com/watch?v={trailer['key']}"
+            except Exception as e:
+                print(f"[TMDB] Detail fetch error for {movie_id}: {e}")
+
         return {
             "genres": "", 
             "overview": match.get("overview", "") or "", 
             "poster_path": match.get("poster_path"),
-            "vote_average": match.get("vote_average", 0.0)
+            "vote_average": match.get("vote_average", 0.0),
+            "imdb_id": imdb_id,
+            "trailer_url": trailer_url
         }
     except Exception as e:
         print(f"[TMDB] Async request error for {movie_title}: {e}")
         return {"genres": "", "overview": movie_title, "poster_path": None}
 
 async def enrich_movie_with_poster_async(movie_dict):
-    if not pd_notnull(movie_dict.get("poster_path")):
+    if not pd_notnull(movie_dict.get("poster_path")) or not movie_dict.get("imdb_id"):
         tmdb = await fetch_metadata_tmdb_async(movie_dict["title"], year=movie_dict.get("year"))
         if tmdb.get("poster_path"):
             movie_dict["poster_path"] = tmdb["poster_path"]
@@ -152,6 +182,12 @@ async def enrich_movie_with_poster_async(movie_dict):
                 movie_dict["description"] = tmdb["overview"]
             if movie_dict.get("rating") == 0:
                 movie_dict["rating"] = tmdb["vote_average"]
+            
+            # Add IMDb and Trailer
+            if tmdb.get("imdb_id"):
+                movie_dict["imdb_id"] = tmdb["imdb_id"]
+            if tmdb.get("trailer_url"):
+                movie_dict["trailer_url"] = tmdb["trailer_url"]
     return movie_dict
 
 # -------------------------

@@ -8,7 +8,6 @@ import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Watchlist from "./pages/Watchlist";
 import MovieDetails from "./pages/MovieDetails";
-import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import StarryBackground from "./components/StarryBackground";
 
@@ -27,7 +26,6 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/watchlist" element={<Watchlist />} />
             <Route path="/movie/:id" element={<MovieDetails />} />
-            <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

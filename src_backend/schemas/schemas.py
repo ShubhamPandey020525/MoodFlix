@@ -15,6 +15,8 @@ class Movie(BaseModel):
     description: Optional[str] = ""
     keywords: List[str] = []
     mood: List[str] = []
+    imdb_id: Optional[str] = None
+    trailer_url: Optional[str] = None
 
 class ChatResponse(BaseModel):
     response: str

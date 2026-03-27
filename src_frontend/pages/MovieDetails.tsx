@@ -104,14 +104,6 @@ export default function MovieDetails() {
             <p className="text-muted-foreground leading-relaxed">{movie.description}</p>
 
             <div className="flex flex-wrap gap-3 pt-2">
-              <button className="gradient-btn px-6 py-2.5 text-sm flex items-center gap-2">
-                <Play className="w-4 h-4" />
-                Watch Trailer
-              </button>
-              <button className="px-6 py-2.5 text-sm border border-border rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-2">
-                <ExternalLink className="w-4 h-4" />
-                Open on IMDb
-              </button>
               <button
                 onClick={() => inWatchlist ? removeFromWatchlist(movie.id) : addToWatchlist(movie)}
                 className={`px-6 py-2.5 text-sm rounded-lg flex items-center gap-2 transition-colors ${

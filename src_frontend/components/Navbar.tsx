@@ -84,9 +84,6 @@ export default function Navbar() {
             <Heart className="w-4 h-4" />
             Watchlist
           </Link>
-          <Link to="/profile" className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary">
-            <User className="w-5 h-5" />
-          </Link>
         </div>
 
         {/* Mobile menu toggle */}
@@ -110,7 +107,6 @@ export default function Navbar() {
           </div>
           <Link to="/dashboard" onClick={() => setMobileMenu(false)} className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary">Home</Link>
           <Link to="/watchlist" onClick={() => setMobileMenu(false)} className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary">Watchlist</Link>
-          <Link to="/profile" onClick={() => setMobileMenu(false)} className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary">Profile</Link>
         </div>
       )}
     </nav>
