@@ -19,10 +19,10 @@ dist-ssr
 .env
 .env.*
 
-# Large files
-src_ai/data/TMDB_movie_dataset_v11.csv
-src_ai/models/vectors.pkl
-src_ai/models/similarity.pkl
+# Dataset and Models
+*.csv
+*.pkl
+*.h5
 
 # Editor directories and files
 .vscode/*
