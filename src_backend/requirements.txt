@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+openai
+python-dotenv
+pandas
+scikit-learn
+httpx
+jose
+passlib
+bcrypt
+requests
+jinja2
+python-multipart
+anyio

@@ -12,14 +12,9 @@ export default function Landing() {
       {/* Nav */}
       <header className="relative z-10 w-full max-w-7xl mx-auto px-6 py-4 flex items-center justify-between shrink-0">
         <img src={logo} alt="MoodFlix" className="h-10 md:h-14 drop-shadow-[0_0_20px_rgba(var(--primary),0.4)]" />
-        <div className="flex items-center gap-3">
-          <Link to="/login" className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            Sign In
-          </Link>
-          <Link to="/signup" className="gradient-btn px-4 py-2 text-sm">
-            Get Started
-          </Link>
-        </div>
+        <Link to="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+          Open Dashboard
+        </Link>
       </header>
 
       {/* Hero */}
@@ -40,11 +35,8 @@ export default function Landing() {
           </p>
 
           <div className="flex items-center justify-center gap-3 flex-wrap mb-6 md:mb-8">
-            <Link to="/signup" className="gradient-btn px-6 py-2.5 text-sm md:text-base">
-              Get Started — It's Free
-            </Link>
-            <Link to="/login" className="px-6 py-2.5 text-sm md:text-base border border-border rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
-              Sign In
+            <Link to="/dashboard" className="gradient-btn px-8 py-3 text-sm md:text-lg">
+              Let's Get Started
             </Link>
           </div>
         </div>

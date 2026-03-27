@@ -25,6 +25,7 @@ export default function MovieCard({ movie, index = 0 }: MovieCardProps) {
           alt={movie.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           loading="lazy"
+          crossOrigin="anonymous"
           onError={(e) => {
             (e.target as HTMLImageElement).src = "https://placehold.co/400x600?text=No+Poster";
           }}

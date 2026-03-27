@@ -1,3 +1,8 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
 # Logs
 logs
 *.log
@@ -15,12 +20,9 @@ dist-ssr
 .env.*
 
 # Large files
-*.csv
-*.pkl
-*.h5
-
-# Lovable
-.lovable/
+src_ai/data/TMDB_movie_dataset_v11.csv
+src_ai/models/vectors.pkl
+src_ai/models/similarity.pkl
 
 # Editor directories and files
 .vscode/*

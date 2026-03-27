@@ -1,16 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import ChatPanel from "@/components/ChatPanel";
 import MovieGrid from "@/components/MovieGrid";
 import type { Movie } from "@/lib/mockData";
 
 export default function Dashboard() {
-  const [recommendations, setRecommendations] = useState<Movie[]>([]);
-  const [hasSearched, setHasSearched] = useState(false);
+  // Load state from sessionStorage if it exists
+  const [recommendations, setRecommendations] = useState<Movie[]>(() => {
+    const saved = sessionStorage.getItem("moodflix_recs");
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  const [messages, setMessages] = useState<any[]>(() => {
+    const saved = sessionStorage.getItem("moodflix_messages");
+    return saved ? JSON.parse(saved) : [
+      {
+        id: "welcome",
+        role: "ai",
+        content: "Hey! 👋 I'm your MoodFlix AI assistant. Tell me your mood, a genre, or a movie you like — and I'll find the perfect recommendations for you!",
+      },
+    ];
+  });
+
+  const [hasSearched, setHasSearched] = useState(() => {
+    return recommendations.length > 0;
+  });
+
+  // Save state whenever it changes
+  useEffect(() => {
+    sessionStorage.setItem("moodflix_recs", JSON.stringify(recommendations));
+    sessionStorage.setItem("moodflix_messages", JSON.stringify(messages));
+    setHasSearched(recommendations.length > 0);
+  }, [recommendations, messages]);
 
   const handleRecommendations = (movies: Movie[]) => {
     setRecommendations(movies);
-    setHasSearched(true);
   };
 
   return (
@@ -20,7 +44,11 @@ export default function Dashboard() {
         <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-6rem)]">
           {/* Chat Panel */}
           <div className="w-full lg:w-[380px] shrink-0 h-full lg:h-auto lg:min-h-[600px]">
-            <ChatPanel onRecommendations={handleRecommendations} />
+            <ChatPanel 
+              onRecommendations={handleRecommendations} 
+              messages={messages}
+              setMessages={setMessages}
+            />
           </div>
 
           {/* Movie Grid */}
@@ -37,9 +65,26 @@ export default function Dashboard() {
               </div>
             ) : (
               <div>
-                <h2 className="font-heading text-lg font-semibold text-foreground mb-4">
-                  Recommendations ({recommendations.length})
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-heading text-lg font-semibold text-foreground">
+                    Recommendations ({recommendations.length})
+                  </h2>
+                  <button 
+                    onClick={() => {
+                      setRecommendations([]);
+                      setMessages([{
+                        id: "welcome",
+                        role: "ai",
+                        content: "Hey! 👋 I'm your MoodFlix AI assistant. Tell me your mood, a genre, or a movie you like — and I'll find the perfect recommendations for you!",
+                      }]);
+                      sessionStorage.removeItem("moodflix_recs");
+                      sessionStorage.removeItem("moodflix_messages");
+                    }}
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Clear Chat
+                  </button>
+                </div>
                 <MovieGrid movies={recommendations} />
               </div>
             )}

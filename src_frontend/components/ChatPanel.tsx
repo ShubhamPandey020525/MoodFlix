@@ -13,6 +13,8 @@ interface Message {
 
 interface ChatPanelProps {
   onRecommendations: (movies: Movie[]) => void;
+  messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 }
 
 function TypingIndicator() {
@@ -25,14 +27,7 @@ function TypingIndicator() {
   );
 }
 
-export default function ChatPanel({ onRecommendations }: ChatPanelProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      role: "ai",
-      content: "Hey! 👋 I'm your MoodFlix AI assistant. Tell me your mood, a genre, or a movie you like — and I'll find the perfect recommendations for you!",
-    },
-  ]);
+export default function ChatPanel({ onRecommendations, messages, setMessages }: ChatPanelProps) {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -51,13 +46,13 @@ export default function ChatPanel({ onRecommendations }: ChatPanelProps) {
     setMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
 
-    const results = await getRecommendations(query);
-    const aiText = getAiMessage(query, results);
+    const { response, recommendations } = await getRecommendations(query);
+    const aiText = response; // Use the AI's actual friendly message from backend
 
     setIsTyping(false);
-    const aiMsg: Message = { id: (Date.now() + 1).toString(), role: "ai", content: aiText, movies: results };
+    const aiMsg: Message = { id: (Date.now() + 1).toString(), role: "ai", content: aiText, movies: recommendations };
     setMessages((prev) => [...prev, aiMsg]);
-    onRecommendations(results);
+    onRecommendations(recommendations);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

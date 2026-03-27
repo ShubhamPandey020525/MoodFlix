@@ -1,22 +1,8 @@
-# src/recommender.py
-"""
-Combined recommender CLI:
- - Accepts any combination of: movie, genres, keywords, mood (user can skip any).
- - Priorities & behavior:
-    * If movie provided -> try exact (case-insensitive) match in dataset.
-      - If exact or FUZZY match found -> by default USE precomputed similarity (fast).
-      - If movie matched AND user also provided genres/keywords/mood -> build combined tags
-        (movie metadata + user inputs) and use dynamic vector-based similarity so preferences blend.
-      - If movie not found in dataset -> fetch TMDB metadata (if TMDB key present), combine with
-        user inputs and use vector-based similarity (dynamic).
-    * If movie NOT provided -> build tags from genres/keywords/mood and use vector-based similarity.
- - Outputs top 20 recommendations (titles) and prints which path was used.
- - Uses existing saved artifacts in models/: movies.pkl, vectors.pkl, vectorizer.pkl, similarity.pkl
-"""
-
 import os
 import pickle
-import requests
+import httpx
+import asyncio
+import pandas as pd
 from dotenv import load_dotenv
 from difflib import get_close_matches
 from sklearn.metrics.pairwise import cosine_similarity
@@ -29,18 +15,30 @@ TMDB_API_KEY = os.getenv("TMDB_API_KEY")
 TMDB_SEARCH_URL = "https://api.themoviedb.org/3/search/movie"
 TMDB_DETAIL_URL = "https://api.themoviedb.org/3/movie/{}"
 
-TOP_K = 20
+TOP_K = 100
 
 # -------------------------
 # Load artifacts (once)
 # -------------------------
+# Use absolute path relative to the current file to make it deployment-friendly
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODELS_DIR = os.getenv("MODELS_DIR", os.path.join(BASE_DIR, "models"))
+
 try:
-    movies = pickle.load(open("models/movies.pkl", "rb"))        # DataFrame with 'title' & (optionally) tags/overview
-    vectors = pickle.load(open("models/vectors.pkl", "rb"))      # ndarray (n_movies x n_features)
-    vectorizer = pickle.load(open("models/vectorizer.pkl", "rb"))# fitted CountVectorizer or similar
-    similarity = pickle.load(open("models/similarity.pkl", "rb"))# precomputed similarity matrix
+    movies = pickle.load(open(os.path.join(MODELS_DIR, "movies.pkl"), "rb"))        # DataFrame with 'title' & (optionally) tags/overview
+    vectors = pickle.load(open(os.path.join(MODELS_DIR, "vectors.pkl"), "rb"))      # ndarray (n_movies x n_features)
+    vectorizer = pickle.load(open(os.path.join(MODELS_DIR, "vectorizer.pkl"), "rb"))# fitted CountVectorizer or similar
+    similarity = pickle.load(open(os.path.join(MODELS_DIR, "similarity.pkl"), "rb"))# precomputed similarity matrix
 except Exception as e:
-    raise RuntimeError("Missing or unreadable model files in models/ directory.") from e
+    # Fallback for local development if MODELS_DIR fails
+    LOCAL_MODELS_DIR = r"C:\Users\pande\MoodFlix\src_ai\models"
+    try:
+        movies = pickle.load(open(os.path.join(LOCAL_MODELS_DIR, "movies.pkl"), "rb"))
+        vectors = pickle.load(open(os.path.join(LOCAL_MODELS_DIR, "vectors.pkl"), "rb"))
+        vectorizer = pickle.load(open(os.path.join(LOCAL_MODELS_DIR, "vectorizer.pkl"), "rb"))
+        similarity = pickle.load(open(os.path.join(LOCAL_MODELS_DIR, "similarity.pkl"), "rb"))
+    except:
+        raise RuntimeError(f"Missing or unreadable model files in {MODELS_DIR} or {LOCAL_MODELS_DIR}.") from e
 
 titles = movies["title"].astype(str).values
 lower_titles = [t.lower() for t in titles]
@@ -56,36 +54,105 @@ mood_map = {
     "thrilled": "action thriller suspense",
     "scared": "horror supernatural thriller",
     "inspired": "biography motivation true story",
-    # add more as needed
 }
 
 # -------------------------
-# Helper: TMDB metadata fetch
+# Helpers
 # -------------------------
-def fetch_metadata_tmdb(movie_title):
+def pd_notnull(v):
+    return v is not None and (not (isinstance(v, float) and (v != v)))
+
+def format_movie_record(movie_data, idx=0):
     """
-    Returns dict: {'genres': 'g1 g2', 'overview': '...'}
-    If TMDB not configured or not found, returns fallback with overview=movie_title.
+    Ensures a movie record (dict) matches the Movie schema in src_backend/schemas/schemas.py
     """
-    if not TMDB_API_KEY:
-        return {"genres": "", "overview": movie_title}
+    def to_list(val):
+        if not pd_notnull(val): return []
+        if isinstance(val, list): return val
+        if isinstance(val, str): return [s.strip() for s in val.split(",") if s.strip()]
+        return []
 
     try:
-        r = requests.get(TMDB_SEARCH_URL, params={"api_key": TMDB_API_KEY, "query": movie_title}, timeout=8)
-        r.raise_for_status()
-        results = r.json().get("results", [])
-        if not results:
-            return {"genres": "", "overview": movie_title}
+        title = str(movie_data.get("title", "Unknown"))
+        poster = movie_data.get("poster_path")
+        
+        return {
+            "id": int(movie_data.get("id", idx)),
+            "title": title,
+            "poster_path": str(poster) if pd_notnull(poster) else None,
+            "genres": to_list(movie_data.get("genres")),
+            "rating": float(movie_data.get("rating", movie_data.get("vote_average", 0.0))) if pd_notnull(movie_data.get("rating")) or pd_notnull(movie_data.get("vote_average")) else 0.0,
+            "year": int(movie_data.get("year", 0)) if pd_notnull(movie_data.get("year")) else 0,
+            "description": str(movie_data.get("overview", movie_data.get("description", ""))),
+            "keywords": to_list(movie_data.get("keywords")),
+            "mood": to_list(movie_data.get("mood"))
+        }
+    except Exception as e:
+        print(f"[RECO] Formatting error for {movie_data.get('title')}: {e}")
+        return {
+            "id": idx, "title": str(movie_data.get("title", "Unknown")), "poster_path": None,
+            "genres": [], "rating": 0.0, "year": 0, "description": "", "keywords": [], "mood": []
+        }
 
-        movie_id = results[0]["id"]
-        r2 = requests.get(TMDB_DETAIL_URL.format(movie_id), params={"api_key": TMDB_API_KEY}, timeout=8)
-        r2.raise_for_status()
-        details = r2.json()
-        genres = " ".join([g.get("name", "") for g in details.get("genres", [])]).strip()
-        overview = details.get("overview", "") or ""
-        return {"genres": genres, "overview": overview}
-    except Exception:
-        return {"genres": "", "overview": movie_title}
+async def fetch_metadata_tmdb_async(movie_title, year=None):
+    if not TMDB_API_KEY:
+        return {"genres": "", "overview": movie_title, "poster_path": None}
+    
+    try:
+        raw_title = str(movie_title).strip()
+        clean_title = raw_title.split("(")[0].split(" - ")[0].split(": ")[0].strip()
+        
+        search_year = None
+        if year and pd_notnull(year):
+            try:
+                search_year = int(float(year))
+                if search_year < 1900 or search_year > 2030:
+                    search_year = None
+            except:
+                search_year = None
+
+        search_attempts = [
+            {"query": clean_title, "year": search_year},
+            {"query": raw_title, "year": search_year},
+            {"query": clean_title},
+            {"query": raw_title},
+            {"query": clean_title.split(":")[0].split("-")[0].strip()}
+        ]
+
+        async with httpx.AsyncClient() as client:
+            for params in search_attempts:
+                if not params.get("query"): continue
+                search_params = {"api_key": TMDB_API_KEY, **params}
+                r = await client.get(TMDB_SEARCH_URL, params=search_params, timeout=5)
+                r.raise_for_status()
+                results = r.json().get("results", [])
+                if results:
+                    break
+
+        if not results:
+            return {"genres": "", "overview": movie_title, "poster_path": None}
+        
+        match = results[0]
+        return {
+            "genres": "", 
+            "overview": match.get("overview", "") or "", 
+            "poster_path": match.get("poster_path"),
+            "vote_average": match.get("vote_average", 0.0)
+        }
+    except Exception as e:
+        print(f"[TMDB] Async request error for {movie_title}: {e}")
+        return {"genres": "", "overview": movie_title, "poster_path": None}
+
+async def enrich_movie_with_poster_async(movie_dict):
+    if not pd_notnull(movie_dict.get("poster_path")):
+        tmdb = await fetch_metadata_tmdb_async(movie_dict["title"], year=movie_dict.get("year"))
+        if tmdb.get("poster_path"):
+            movie_dict["poster_path"] = tmdb["poster_path"]
+            if not movie_dict.get("description") or len(movie_dict["description"]) < 10:
+                movie_dict["description"] = tmdb["overview"]
+            if movie_dict.get("rating") == 0:
+                movie_dict["rating"] = tmdb["vote_average"]
+    return movie_dict
 
 # -------------------------
 # Core recommenders
@@ -95,140 +162,112 @@ def recommend_existing_by_index(movie_index, top_k=TOP_K):
     ranked = sorted(list(enumerate(row)), key=lambda x: x[1], reverse=True)
     results = []
     for idx, score in ranked:
-        if idx == movie_index:
-            continue
-        results.append(titles[idx])
-        if len(results) >= top_k:
-            break
+        if idx == movie_index: continue
+        results.append(format_movie_record(movies.iloc[idx].to_dict(), idx))
+        if len(results) >= top_k: break
     return results
 
-def recommend_by_tags(tags, top_k=TOP_K):
-    # tags -> vector -> cosine similarity with dataset vectors
-    new_vec = vectorizer.transform([tags]).toarray()
+def recommend_dynamic(new_tags, top_k=TOP_K):
+    new_vec = vectorizer.transform([new_tags]).toarray()
     scores = cosine_similarity(new_vec, vectors)[0]
     ranked = sorted(list(enumerate(scores)), key=lambda x: x[1], reverse=True)
-    results = [titles[idx] for idx, s in ranked[:top_k]]
+    results = []
+    for idx, score in ranked:
+        results.append(format_movie_record(movies.iloc[idx].to_dict(), idx))
+        if len(results) >= top_k: break
     return results
 
-# -------------------------
-# Router that handles combinations
-# -------------------------
-def recommend_router(movie=None, genres=None, keywords=None, mood=None, fuzzy_cutoff=0.6, top_k=TOP_K):
-    """
-    movie, genres, keywords, mood are strings or None.
-    Returns dictionary:
-      { "path": <one of: dataset_exact, dataset_fuzzy, dynamic_tmdb, combined_tags, mood_only, tags_only>,
-        "used_title_or_tags": ...,
-        "recommendations": [titles...] }
-    Rules:
-      - If movie provided: try exact (case-insensitive). If found -> dataset_exact (fast).
-      - If movie provided but not exact: try fuzzy against dataset. If fuzzy match found -> dataset_fuzzy (fast).
-      - If movie provided AND any of genres/keywords/mood are provided -> build combined tags (movie metadata + user inputs)
-         and use recommend_by_tags (path 'combined_tags') so user preferences are blended.
-      - If movie NOT in dataset or user requested blending -> dynamic path:
-         fetch TMDB metadata (if available), combine with user inputs, and use recommend_by_tags (path 'dynamic_tmdb').
-      - If only genres/keywords/mood provided (no movie) -> build tags and use recommend_by_tags (path 'tags_only' or 'mood_only').
-    """
-    # normalize inputs
-    movie_in = (movie.strip() if movie and movie.strip() else None)
-    genres_in = (genres.strip() if genres and genres.strip() else None)
-    keywords_in = (keywords.strip() if keywords and keywords.strip() else None)
-    mood_in = (mood.strip().lower() if mood and mood.strip() else None)
+# Alias for compatibility
+def recommend_by_tags(tags, top_k=TOP_K):
+    return recommend_dynamic(tags, top_k=top_k)
 
-    # 1) If movie provided -> check dataset exact
+async def recommend_router(movie=None, genres=None, keywords=None, mood=None, top_k=TOP_K):
+    movie_in = movie.strip() if (movie and movie.strip()) else None
+    genres_in = genres.strip() if (genres and genres.strip()) else None
+    keywords_in = keywords.strip() if (keywords and keywords.strip()) else None
+    mood_in = mood.strip() if (mood and mood.strip()) else None
+
+    recs = []
+    path = ""
+
     if movie_in:
         lower_movie = movie_in.lower()
         if lower_movie in lower_to_index:
-            # exact found
             idx = lower_to_index[lower_movie]
-            # if user also provided extra filters -> blend via tags
             if genres_in or keywords_in or mood_in:
-                # build combined tags: dataset movie metadata if available + user inputs
-                # try to use movies['tags'] or movies columns if present
-                movie_tags = ""
-                if "tags" in movies.columns:
-                    movie_tags = str(movies.loc[idx, "tags"]) if pd_notnull(movies.loc[idx, "tags"]) else ""
-                # fallback to title if no tags
-                if not movie_tags:
-                    movie_tags = movie_in
+                movie_tags = str(movies.loc[idx, "tags"]) if "tags" in movies.columns and pd_notnull(movies.loc[idx, "tags"]) else movie_in
                 user_tags = build_user_tags(genres_in, keywords_in, mood_in)
                 combined_tags = f"{movie_tags} {user_tags}".strip()
                 recs = recommend_by_tags(combined_tags, top_k=top_k)
-                return {"path": "combined_tags", "used_title_or_tags": combined_tags, "recommendations": recs}
-            # else pure dataset exact fast path
-            recs = recommend_existing_by_index(idx, top_k=top_k)
-            return {"path": "dataset_exact", "used_title_or_tags": titles[idx], "recommendations": recs}
-
-        # 2) not exact -> fuzzy against dataset titles (only to find if user meant dataset movie)
-        match = get_close_matches(lower_movie, lower_titles, n=1, cutoff=fuzzy_cutoff)
-        if match:
-            matched_lower = match[0]
-            matched_idx = lower_to_index[matched_lower]
-            # same blending rule: if extra inputs provided, blend via tags; else fast fuzzy path
-            if genres_in or keywords_in or mood_in:
-                movie_tags = ""
-                if "tags" in movies.columns:
-                    movie_tags = str(movies.loc[matched_idx, "tags"]) if pd_notnull(movies.loc[matched_idx, "tags"]) else ""
-                if not movie_tags:
-                    movie_tags = titles[matched_idx]
+                path = "combined_tags"
+            else:
+                recs = recommend_existing_by_index(idx, top_k=top_k)
+                path = "dataset_exact"
+        else:
+            match = get_close_matches(lower_movie, lower_titles, n=1, cutoff=0.7)
+            if match:
+                matched_idx = lower_to_index[match[0]]
+                if genres_in or keywords_in or mood_in:
+                    movie_tags = str(movies.loc[matched_idx, "tags"]) if "tags" in movies.columns and pd_notnull(movies.loc[matched_idx, "tags"]) else titles[matched_idx]
+                    user_tags = build_user_tags(genres_in, keywords_in, mood_in)
+                    combined_tags = f"{movie_tags} {user_tags}".strip()
+                    recs = recommend_by_tags(combined_tags, top_k=top_k)
+                    path = "combined_tags_fuzzy"
+                else:
+                    recs = recommend_existing_by_index(matched_idx, top_k=top_k)
+                    path = "dataset_fuzzy"
+            else:
+                meta = await fetch_metadata_tmdb_async(movie_in)
+                base_tags = f"{meta.get('genres','')} {meta.get('overview','')}".strip()
                 user_tags = build_user_tags(genres_in, keywords_in, mood_in)
-                combined_tags = f"{movie_tags} {user_tags}".strip()
-                recs = recommend_by_tags(combined_tags, top_k=top_k)
-                return {"path": "combined_tags_fuzzy", "used_title_or_tags": combined_tags, "recommendations": recs}
-            recs = recommend_existing_by_index(matched_idx, top_k=top_k)
-            return {"path": "dataset_fuzzy", "used_title_or_tags": titles[matched_idx], "recommendations": recs}
+                combined = f"{base_tags} {user_tags}".strip() if user_tags else (base_tags or movie_in)
+                recs = recommend_by_tags(combined, top_k=top_k)
+                path = "dynamic_tmdb"
 
-        # 3) movie provided but not found in dataset -> dynamic TMDB + user inputs
-        meta = fetch_metadata_tmdb(movie_in)
-        base_tags = f"{meta.get('genres','')} {meta.get('overview','')}".strip()
-        user_tags = build_user_tags(genres_in, keywords_in, mood_in)
-        combined = f"{base_tags} {user_tags}".strip() if user_tags else (base_tags or movie_in)
-        recs = recommend_by_tags(combined, top_k=top_k)
-        return {"path": "dynamic_tmdb", "used_title_or_tags": combined, "recommendations": recs}
-
-    # 4) No movie provided: use genres/keywords/mood
-    if genres_in or keywords_in or mood_in:
+    elif genres_in or keywords_in or mood_in:
         tags = build_user_tags(genres_in, keywords_in, mood_in)
-        recs = recommend_by_tags(tags, top_k=top_k)
+        recs = recommend_dynamic(tags, top_k=top_k)
         path = "mood_only" if (not genres_in and not keywords_in and mood_in) else "tags_only"
-        return {"path": path, "used_title_or_tags": tags, "recommendations": recs}
+    
+    if not recs:
+        recs = [format_movie_record(row, i) for i, row in movies.sample(min(top_k, len(movies))).iterrows()]
+        path = "random_fallback"
 
-    # 5) nothing provided
-    return {"error": "No valid input provided. Provide movie or genres/keywords/mood."}
+    # SPEED FIX: Use parallel tasks to fetch posters for ALL recommendations
+    if TMDB_API_KEY:
+        tasks = [enrich_movie_with_poster_async(r) for r in recs]
+        recs = await asyncio.gather(*tasks)
 
-# -------------------------
-# Small helpers
-# -------------------------
-def pd_notnull(v):
-    # lightweight helper to check pandas-like not-null without importing pandas in top scope
-    return v is not None and (not (isinstance(v, float) and (v != v)))  # NaN check
+    return {"path": path, "recommendations": recs}
 
 def build_user_tags(genres, keywords, mood):
     parts = []
-    if genres:
-        parts.append(genres)
-    if keywords:
-        parts.append(keywords)
-    if mood:
-        parts.append(mood_map.get(mood.lower(), mood))
+    if genres: parts.append(genres)
+    if keywords: parts.append(keywords)
+    if mood: parts.append(mood_map.get(mood.lower(), mood))
     return " ".join([p for p in parts if p]).strip()
 
-# -------------------------
-# CLI: minimal interactive terminal run
-# -------------------------
-if __name__ == "__main__":
-    print("Provide any of: movie (name), genres (comma/space separated), keywords, mood (one word). Leave blank to skip.")
-    movie = input("Movie (or leave blank): ").strip()
-    genres = input("Genres (or leave blank): ").strip()
-    keywords = input("Keywords (or leave blank): ").strip()
-    mood = input("Mood (or leave blank): ").strip()
-
-    out = recommend_router(movie=movie or None, genres=genres or None, keywords=keywords or None, mood=mood or None, top_k=TOP_K)
-    if "error" in out:
-        print("ERROR:", out["error"])
-    else:
-        print(f"\nPath used: {out['path']}")
-        print(f"Used title/tags: {out['used_title_or_tags']}\n")
-        print(f"Top {TOP_K} recommendations:")
-        for i, t in enumerate(out["recommendations"], start=1):
-            print(f"{i:2d}. {t}")
+async def get_movie_by_id(movie_id):
+    """
+    Finds a movie in the dataframe by its ID and enriches it with TMDB data if needed.
+    """
+    try:
+        movie_data = None
+        
+        # 1. Search in dataframe
+        if "id" in movies.columns:
+            matches = movies[movies["id"] == movie_id]
+            if not matches.empty:
+                movie_data = matches.iloc[0].to_dict()
+        
+        if movie_data is None and 0 <= movie_id < len(movies):
+            movie_data = movies.iloc[movie_id].to_dict()
+            
+        if movie_data:
+            formatted = format_movie_record(movie_data, movie_id)
+            return await enrich_movie_with_poster_async(formatted)
+            
+        return None
+    except Exception as e:
+        print(f"[RECO] Error fetching movie by ID {movie_id}: {e}")
+        return None
