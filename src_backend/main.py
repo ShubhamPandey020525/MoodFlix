@@ -6,13 +6,17 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 # Internal imports
-from .schemas.schemas import (
-    ChatQuery, ChatResponse
-)
+try:
+    from .schemas.schemas import ChatQuery, ChatResponse
+except ImportError:
+    from schemas.schemas import ChatQuery, ChatResponse
 
 # Paths for AI src imports
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(os.path.dirname(CURRENT_DIR), "src_ai", "src"))
+AI_SRC_PATH = os.path.join(os.path.dirname(CURRENT_DIR), "src_ai", "src")
+if AI_SRC_PATH not in sys.path:
+    sys.path.append(AI_SRC_PATH)
+
 from llm_recommender import chat_with_moodflix, get_movie_by_id
 
 app = FastAPI(title="MoodFlix API")
@@ -66,3 +70,8 @@ async def get_movie(movie_id: int):
     if not movie:
         raise HTTPException(status_code=404, detail="Movie not found")
     return movie
+
+if __name__ == "__main__":
+    import uvicorn
+    # If running directly, use the module name for reload to work
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
