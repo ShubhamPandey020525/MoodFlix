@@ -42,25 +42,41 @@ docker-compose up --build
 
 To run the frontend and backend separately for development:
 
-#### **Frontend**
-1.  Install dependencies:
+#### **Environment Setup**
+1.  **Create a virtual environment** (using Conda or venv):
     ```bash
+    # Using Conda
+    conda create -n moodflix python=3.10 -y
+    conda activate moodflix
+    
+    # OR Using venv
+    python -m venv venv
+    source venv/bin/activate  # On Windows: venv\Scripts\activate
+    ```
+2.  **Install dependencies**:
+    ```bash
+    # Backend dependencies
+    pip install -r requirements.txt
+    
+    # Frontend dependencies
     npm install
     ```
-2.  Start the development server:
-    ```bash
-    npm run dev
-    ```
 
-#### **Backend**
-1.  Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-2.  Start the FastAPI server:
+#### **Running the Application**
+
+You will need two terminal windows:
+
+1.  **Terminal 1: Backend**
     ```bash
     uvicorn src_backend.main:app --reload
     ```
+    *The API will be available at `http://localhost:8000`*
+
+2.  **Terminal 2: Frontend**
+    ```bash
+    npm run dev
+    ```
+    *The app will be available at `http://localhost:3000` (or the port shown in your terminal)*
 
 ## Optimization & Parallelism
 
