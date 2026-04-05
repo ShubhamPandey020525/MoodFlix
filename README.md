@@ -38,6 +38,30 @@ docker-compose up --build
 - **Frontend**: Accessible at `http://localhost:3000`
 - **Backend**: Accessible at `http://localhost:8000`
 
+### Manual Setup (Development)
+
+To run the frontend and backend separately for development:
+
+#### **Frontend**
+1.  Install dependencies:
+    ```bash
+    npm install
+    ```
+2.  Start the development server:
+    ```bash
+    npm run dev
+    ```
+
+#### **Backend**
+1.  Install dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+2.  Start the FastAPI server:
+    ```bash
+    uvicorn src_backend.main:app --reload
+    ```
+
 ## Optimization & Parallelism
 
 The project has been optimized for multi-user support:
