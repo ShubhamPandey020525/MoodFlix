@@ -68,12 +68,7 @@ You will need two terminal windows:
 
 1.  **Terminal 1: Backend**
     ```bash
-    # Option 1: Standard FastAPI way
     uvicorn src_backend.main:app --reload
-
-    # Option 2: Run directly as script
-    cd src_backend
-    python main.py
     ```
     *The API will be available at `http://localhost:8000`*
 
