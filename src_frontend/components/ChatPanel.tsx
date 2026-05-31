@@ -15,6 +15,8 @@ interface ChatPanelProps {
   onRecommendations: (movies: Movie[]) => void;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+  transparent?: boolean;
+  hideHeader?: boolean;
 }
 
 function TypingIndicator() {
@@ -27,7 +29,13 @@ function TypingIndicator() {
   );
 }
 
-export default function ChatPanel({ onRecommendations, messages, setMessages }: ChatPanelProps) {
+export default function ChatPanel({ 
+  onRecommendations, 
+  messages, 
+  setMessages, 
+  transparent = false,
+  hideHeader = false 
+}: ChatPanelProps) {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -63,19 +71,23 @@ export default function ChatPanel({ onRecommendations, messages, setMessages }: 
   };
 
   return (
-    <div className="flex flex-col h-full bg-card/50 border border-border rounded-2xl overflow-hidden">
+    <div className={`flex flex-col h-full overflow-hidden ${
+      transparent ? "bg-transparent border-none" : "bg-card/50 border border-border rounded-2xl"
+    }`}>
       {/* Header */}
-      <div className="px-4 py-3 border-b border-border flex items-center gap-2">
-        <Sparkles className="w-4 h-4 text-primary" />
-        <h2 className="font-heading font-semibold text-sm text-foreground">AI Assistant</h2>
-      </div>
+      {!hideHeader && (
+        <div className="px-4 py-3 border-b border-border flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-primary" />
+          <h2 className="font-heading font-semibold text-sm text-foreground">AI Assistant</h2>
+        </div>
+      )}
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
         {messages.map((msg) => (
           <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
-              className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+              className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
                 msg.role === "user"
                   ? "bg-primary text-primary-foreground rounded-br-md"
                   : "bg-secondary text-secondary-foreground rounded-bl-md"
@@ -101,7 +113,7 @@ export default function ChatPanel({ onRecommendations, messages, setMessages }: 
             <button
               key={prompt}
               onClick={() => handleSend(prompt)}
-              className="text-xs px-3 py-1.5 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-primary/5 transition-colors"
+              className="text-xs px-3 py-1.5 rounded-full border border-white/10 text-gray-400 hover:text-white hover:border-primary/50 hover:bg-primary/5 transition-all"
             >
               {prompt}
             </button>
@@ -110,7 +122,7 @@ export default function ChatPanel({ onRecommendations, messages, setMessages }: 
       )}
 
       {/* Input */}
-      <div className="p-3 border-t border-border">
+      <div className={`p-3 ${transparent ? "" : "border-t border-border"}`}>
         <div className="flex items-center gap-2">
           <input
             ref={inputRef}
@@ -119,7 +131,7 @@ export default function ChatPanel({ onRecommendations, messages, setMessages }: 
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Describe your mood or ask for a movie..."
-            className="flex-1 bg-secondary rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
             aria-label="Chat message input"
           />
           <button

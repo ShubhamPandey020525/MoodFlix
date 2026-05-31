@@ -41,14 +41,14 @@ async def explain_recommendations(query, params, recommendations):
     Uses LLM to present the recommendations to the user in a friendly way.
     """
     recs_titles = [r.get("title", "Unknown") if isinstance(r, dict) else str(r) for r in recommendations]
-    recs_list = "\n".join([f"- {r}" for r in recs_titles])
-    prompt = f"The user asked: \"{query}\". Based on their request, we found these movies: {recs_list}. Provide a friendly, conversational response explaining why these were chosen."
+    recs_list = "\n".join([f"{i+1}. {r}" for i, r in enumerate(recs_titles)])
+    prompt = f"The user asked: \"{query}\". Based on their request, we found these movies: {recs_list}. Provide a friendly, conversational response explaining why these were chosen. Use a numbered list for the movies and ensure each movie is on a new line."
 
     try:
         response = await client.chat.completions.create(
             model="grok-beta",
             messages=[
-                {"role": "system", "content": "You are a friendly movie expert at MoodFlix."},
+                {"role": "system", "content": "You are a friendly movie expert at MoodFlix. Always provide movie recommendations in a clear numbered list format."},
                 {"role": "user", "content": prompt}
             ],
         )

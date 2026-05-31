@@ -32,13 +32,16 @@ try:
 except Exception as e:
     # Fallback for local development if MODELS_DIR fails
     LOCAL_MODELS_DIR = r"C:\Users\pande\MoodFlix\src_ai\models"
+    print(f"[RECO] Models not found in {MODELS_DIR}, trying {LOCAL_MODELS_DIR}...")
     try:
         movies = pickle.load(open(os.path.join(LOCAL_MODELS_DIR, "movies.pkl"), "rb"))
         vectors = pickle.load(open(os.path.join(LOCAL_MODELS_DIR, "vectors.pkl"), "rb"))
         vectorizer = pickle.load(open(os.path.join(LOCAL_MODELS_DIR, "vectorizer.pkl"), "rb"))
         similarity = pickle.load(open(os.path.join(LOCAL_MODELS_DIR, "similarity.pkl"), "rb"))
-    except:
-        raise RuntimeError(f"Missing or unreadable model files in {MODELS_DIR} or {LOCAL_MODELS_DIR}.") from e
+        print("[RECO] Models loaded successfully from fallback path.")
+    except Exception as fallback_error:
+        print(f"[RECO] CRITICAL: Missing model files. Error: {fallback_error}")
+        raise RuntimeError(f"Missing or unreadable model files in {MODELS_DIR} or {LOCAL_MODELS_DIR}.") from fallback_error
 
 titles = movies["title"].astype(str).values
 lower_titles = [t.lower() for t in titles]

@@ -10,6 +10,7 @@ import Watchlist from "./pages/Watchlist";
 import MovieDetails from "./pages/MovieDetails";
 import NotFound from "./pages/NotFound";
 import StarryBackground from "./components/StarryBackground";
+import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/dashboard" element={<Dashboard />} />

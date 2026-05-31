@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Star, Heart, Eye } from "lucide-react";
+import { Star, Heart, Eye, Play } from "lucide-react";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import type { Movie } from "@/lib/mockData";
 
@@ -18,6 +18,11 @@ export default function MovieCard({ movie, index = 0 }: MovieCardProps) {
       className="group relative bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.03] hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
       style={{ animationDelay: `${index * 80}ms` }}
     >
+      {/* Number Badge */}
+      <div className="absolute top-2 left-2 z-20 w-8 h-8 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-[11px] font-black text-primary">
+        #{index + 1}
+      </div>
+
       {/* Poster */}
       <div className="relative aspect-[2/3] overflow-hidden">
         <img
@@ -31,26 +36,28 @@ export default function MovieCard({ movie, index = 0 }: MovieCardProps) {
           }}
         />
         {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-          <div className="flex gap-2 w-full">
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4">
+          <div className="flex flex-col gap-3 w-full max-w-[160px]">
             <button
               onClick={() => navigate(`/movie/${movie.id}`)}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/10 backdrop-blur-md text-white text-xs font-bold hover:bg-white/20 transition-all border border-white/20 shadow-xl"
               aria-label={`View details for ${movie.title}`}
             >
-              <Eye className="w-3.5 h-3.5" />
+              <Eye className="w-4 h-4" />
               Details
             </button>
+            
             <button
               onClick={() => inWatchlist ? removeFromWatchlist(movie.id) : addToWatchlist(movie)}
-              className={`flex items-center justify-center p-2 rounded-lg transition-colors ${
+              className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl transition-all border ${
                 inWatchlist
-                  ? "bg-accent text-accent-foreground"
-                  : "bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground"
+                  ? "bg-accent border-accent text-accent-foreground shadow-lg shadow-accent/20"
+                  : "bg-white/10 border-white/20 text-white hover:bg-accent hover:border-accent"
               }`}
               aria-label={inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
             >
               <Heart className={`w-4 h-4 ${inWatchlist ? "fill-current" : ""}`} />
+              {inWatchlist ? "Saved" : "Watchlist"}
             </button>
           </div>
         </div>

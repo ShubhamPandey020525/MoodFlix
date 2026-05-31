@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Star, Heart, Play, ExternalLink } from "lucide-react";
 import { getMovieById } from "@/lib/api";
@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 
 export default function MovieDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
@@ -45,7 +46,7 @@ export default function MovieDetails() {
         <Navbar />
         <div className="pt-24 px-4 max-w-5xl mx-auto text-center">
           <p className="text-muted-foreground">Movie not found.</p>
-          <Link to="/dashboard" className="text-primary hover:underline mt-4 inline-block">Back to Dashboard</Link>
+          <button onClick={() => navigate(-1)} className="text-primary hover:underline mt-4 inline-block">Back</button>
         </div>
       </div>
     );
@@ -62,10 +63,13 @@ export default function MovieDetails() {
       </div>
 
       <div className="relative pt-24 px-4 max-w-5xl mx-auto pb-12">
-        <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
+        <button 
+          onClick={() => navigate(-1)} 
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors"
+        >
           <ArrowLeft className="w-4 h-4" />
           Back
-        </Link>
+        </button>
 
         <div className="flex flex-col md:flex-row gap-8 animate-fade-in">
           {/* Poster */}
@@ -101,20 +105,30 @@ export default function MovieDetails() {
               ))}
             </div>
 
-            <p className="text-muted-foreground leading-relaxed">{movie.description}</p>
+            <p className="text-muted-foreground leading-relaxed text-lg">{movie.description}</p>
 
             <div className="flex flex-wrap gap-3 pt-2">
               <button
                 onClick={() => inWatchlist ? removeFromWatchlist(movie.id) : addToWatchlist(movie)}
-                className={`px-6 py-2.5 text-sm rounded-lg flex items-center gap-2 transition-colors ${
+                className={`px-6 py-2.5 text-sm rounded-lg flex items-center gap-2 transition-all shadow-lg ${
                   inWatchlist
-                    ? "bg-accent text-accent-foreground"
+                    ? "bg-accent text-accent-foreground shadow-accent/20"
                     : "border border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
                 }`}
               >
                 <Heart className={`w-4 h-4 ${inWatchlist ? "fill-current" : ""}`} />
                 {inWatchlist ? "In Watchlist" : "Add to Watchlist"}
               </button>
+            </div>
+
+            {/* Highlighted YouTube Note */}
+            <div className="mt-8 p-4 rounded-xl bg-red-500/5 border border-red-500/20 flex items-center gap-3 group hover:bg-red-500/10 transition-all duration-300">
+              <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+                <Play className="w-4 h-4 text-red-500 fill-current" />
+              </div>
+              <p className="text-sm font-medium text-gray-300">
+                Want to watch the trailer? Official clips and trailers for <span className="text-white font-bold">"{movie.title}"</span> are available on <span className="text-red-500 font-black tracking-tight">YouTube</span>.
+              </p>
             </div>
           </div>
         </div>

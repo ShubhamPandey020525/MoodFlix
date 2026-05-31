@@ -1,17 +1,20 @@
-fastapi
-uvicorn
-pydantic
-pydantic-settings
-openai
-python-dotenv
-pandas
-scikit-learn
-httpx
-jose
-passlib
-bcrypt
-requests
-jinja2
-python-multipart
-anyio
-numpy
+# Core API
+fastapi>=0.100.0
+uvicorn>=0.22.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# AI/LLM (Grok API)
+openai>=1.0.0
+python-dotenv>=1.0.0
+httpx>=0.24.0
+
+# Recommendation Engine
+pandas>=2.0.0
+scikit-learn>=1.2.0
+numpy>=1.24.0
+
+# Utils
+requests>=2.31.0
+python-multipart>=0.0.6
+anyio>=3.7.0

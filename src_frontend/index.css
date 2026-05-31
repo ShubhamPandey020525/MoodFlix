@@ -6,44 +6,45 @@
 
 @layer base {
   :root {
-    --background: 195 100% 4%;
+    /* Mood Psychology Palette: Trust, Emotion, Innovation */
+    --background: 250 100% 4%; /* Deep Indigo - Mystery/Cinematic */
     --foreground: 0 0% 100%;
 
-    --card: 195 100% 6%;
+    --card: 250 100% 6%;
     --card-foreground: 0 0% 100%;
 
-    --popover: 195 100% 6%;
+    --popover: 250 100% 6%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 195 100% 50%;
-    --primary-foreground: 195 100% 4%;
+    --primary: 190 100% 50%; /* Electric Cyan - Innovation/AI */
+    --primary-foreground: 250 100% 4%;
 
-    --secondary: 195 100% 10%;
+    --secondary: 250 100% 10%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 195 20% 20%;
-    --muted-foreground: 195 20% 75%;
+    --muted: 250 20% 15%;
+    --muted-foreground: 250 20% 75%;
 
-    --accent: 3 100% 59%;
+    --accent: 330 100% 60%; /* Rose/Magenta - Emotion/Passion */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 3 100% 59%;
+    --destructive: 0 100% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 195 20% 20%;
-    --input: 195 20% 20%;
-    --ring: 195 100% 50%;
+    --border: 250 20% 20%;
+    --input: 250 20% 20%;
+    --ring: 190 100% 50%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 195 100% 3%;
+    --sidebar-background: 250 100% 3%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 195 100% 50%;
-    --sidebar-primary-foreground: 195 100% 4%;
-    --sidebar-accent: 195 100% 10%;
+    --sidebar-primary: 190 100% 50%;
+    --sidebar-primary-foreground: 250 100% 4%;
+    --sidebar-accent: 250 100% 10%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 195 20% 20%;
-    --sidebar-ring: 195 100% 50%;
+    --sidebar-border: 250 20% 20%;
+    --sidebar-ring: 190 100% 50%;
   }
 }
 
@@ -55,30 +56,30 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-family: 'Inter', sans-serif;
-    /* Deep Metallic Cyan/Teal Base (matching logo) */
-    background-color: hsl(195, 100%, 4%);
+    /* Deep Cinematic Indigo Base */
+    background-color: hsl(250, 100%, 4%);
     background-image: 
-      /* Central Highlight - Lighter and Shiny */
-      radial-gradient(circle at 50% 50%, hsla(195, 100%, 40%, 0.15) 0%, transparent 60%),
+      /* Central Innovation Glow */
+      radial-gradient(circle at 50% 50%, hsla(190, 100%, 40%, 0.1) 0%, transparent 60%),
       
-      /* Subtle Corner Glows (Logo Accent) */
-      radial-gradient(circle at 0% 0%, hsla(195, 100%, 50%, 0.05) 0%, transparent 40%),
-      radial-gradient(circle at 100% 100%, hsla(3, 100%, 59%, 0.03) 0%, transparent 40%),
+      /* Emotional Corner Glows */
+      radial-gradient(circle at 0% 0%, hsla(330, 100%, 50%, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 100% 100%, hsla(190, 100%, 50%, 0.03) 0%, transparent 40%),
       
-      /* Uniform Brushed Metallic Texture */
+      /* Subtle Texture */
       repeating-linear-gradient(
         -45deg,
         transparent,
         transparent 1px,
-        hsla(0, 0%, 100%, 0.015) 1px,
-        hsla(0, 0%, 100%, 0.015) 3px
+        hsla(0, 0%, 100%, 0.01) 1px,
+        hsla(0, 0%, 100%, 0.01) 3px
       ),
       
-      /* Deep Metallic Vignette - Dark Edges, Seamless Blend */
-      radial-gradient(circle at 50% 50%, transparent 10%, hsla(195, 100%, 0%, 0.95) 100%),
+      /* Deep Vignette */
+      radial-gradient(circle at 50% 50%, transparent 10%, hsla(250, 100%, 0%, 0.98) 100%),
       
-      /* Fine Metallic Grain */
-      url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+      /* Fine Grain */
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
     
     background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 250px 250px;
     background-attachment: fixed;
@@ -97,9 +98,9 @@
         background: linear-gradient(
           115deg,
           transparent 35%,
-          hsla(195, 100%, 70%, 0.05) 45%,
-          hsla(195, 100%, 70%, 0.1) 50%,
-          hsla(195, 100%, 70%, 0.05) 55%,
+          hsla(190, 100%, 70%, 0.02) 45%,
+          hsla(190, 100%, 80%, 0.04) 50%,
+          hsla(190, 100%, 70%, 0.02) 55%,
           transparent 65%
         );
         z-index: -1;
@@ -188,5 +189,41 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* ChatPanel internal scroll fix */
+  #chat-section .ChatPanel_container {
+    height: 100% !important;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Premium Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--primary), 0.5);
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  }
+
+  .text-outline-white {
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
   }
 }
