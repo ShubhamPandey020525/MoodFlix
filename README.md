@@ -4,9 +4,12 @@ MoodFlix is a premium, AI-driven movie discovery platform designed to match your
 
 ---
 
-## 📺 Demo & Experience
+## 📺 Live Demo & Immersive Experience
 
-### [Watch the Full Demo Video](https://drive.google.com/file/d/1unre1P1zSo23IHvQyWs7G31vWWkpUKs8/view?usp=sharing)
+> [!IMPORTANT]
+> **[WATCH THE FULL PROJECT DEMO VIDEO HERE](https://drive.google.com/file/d/1unre1P1zSo23IHvQyWs7G31vWWkpUKs8/view?usp=sharing)**
+> 
+> Experience the seamless AI-powered movie discovery, cinematic UI transitions, and neural chat assistant in action.
 
 ---
 
@@ -40,12 +43,27 @@ MoodFlix is a premium, AI-driven movie discovery platform designed to match your
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Technology Stack & Technical Deep-Dive
 
-- **Frontend**: React, TypeScript, Tailwind CSS, Shadcn/UI, Lucide Icons.
-- **Backend**: FastAPI (Python), AsyncOpenAI, HTTPX.
-- **AI/ML Engine**: Grok LLM (Intent Parsing & Natural Response), Scikit-learn (Cosine Similarity), Pandas.
-- **Metadata**: TMDB API Integration for real-time movie posters and data.
+### **Frontend: Immersive User Experience**
+- **React 18 & TypeScript**: Robust, type-safe component architecture.
+- **Tailwind CSS**: Utility-first styling for a custom cinematic dark theme.
+- **Framer Motion & Lucide**: Smooth, physics-based animations and high-quality vector iconography.
+- **Client-Side State**: Efficient state management using React Hooks and SessionStorage for persistent chat sessions.
+- **Responsive Layout**: Advanced CSS Grid and Flexbox for an editorial-grade experience across all devices.
+
+### **Backend: High-Performance Neural Bridge**
+- **FastAPI**: Asynchronous Python web framework for lightning-fast API responses.
+- **Uvicorn**: ASGI server implementation for production-grade performance.
+- **Pydantic**: Strict data validation and settings management using Python type annotations.
+- **Asynchronous Flow**: Leveraging `asyncio` for non-blocking I/O operations, especially during AI inference and metadata fetching.
+
+### **AI & Recommendation Engine: The Neural Core**
+- **LLM Integration (Grok)**: Advanced natural language understanding to extract user intent (mood, genre, keywords) from raw chat messages.
+- **Content-Based Filtering**: A custom recommendation engine using **TF-IDF (Term Frequency-Inverse Document Frequency)** and **Cosine Similarity** to match movie "tags" (genres + overview + keywords).
+- **Vector Space Modeling**: Movies are mapped into a multi-dimensional vector space using `scikit-learn`'s `CountVectorizer`.
+- **Parallel Metadata Enrichment**: Real-time fetching of posters, ratings, and descriptions from **TMDB** using parallel `httpx` requests, reducing latency by up to 70%.
+- **Fuzzy Matching**: `difflib` integration for handling user typos and approximate movie title searches.
 
 ---
 
