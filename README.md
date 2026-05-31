@@ -10,7 +10,26 @@ MoodFlix is a premium, AI-driven movie discovery platform designed to match your
 
 ---
 
-## 🚀 Key Features
+## �️ Visual Proofs
+
+### 1. Hero Experience
+![Hero Section](./proofs/page%201.png)
+
+### 2. Neural Discovery Chat
+![AI Chat](./proofs/page%202.png)
+
+### 3. Movie Recommendations Grid
+![Movie Grid](./proofs/page%203.png)
+
+### 4. Cinematic Detailed View
+![Movie Details](./proofs/page%204.png)
+
+### 5. Personalized Watchlist
+![Watchlist](./proofs/page%205.png)
+
+---
+
+## �🚀 Key Features
 
 - **🧠 Neural Chat Assistant**: Describe your mood, a specific vibe, or even a vague feeling. Our AI (Grok-powered) extracts your intent and explains why each recommendation was chosen.
 - **🔢 Structured Presentation**: Recommendations are delivered in a clean, numbered list format within a terminal-inspired chat interface.
