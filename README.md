@@ -29,7 +29,7 @@ MoodFlix is a premium, AI-driven movie discovery platform designed to match your
 
 ---
 
-## �🚀 Key Features
+## � Key Features
 
 - **🧠 Neural Chat Assistant**: Describe your mood, a specific vibe, or even a vague feeling. Our AI (Grok-powered) extracts your intent and explains why each recommendation was chosen.
 - **🔢 Structured Presentation**: Recommendations are delivered in a clean, numbered list format within a terminal-inspired chat interface.
@@ -66,17 +66,25 @@ TMDB_API_KEY=your_tmdb_api_key
 
 ### 2. Manual Installation
 
-#### **Backend Setup**
+#### **Backend Setup (Conda)**
 ```bash
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+# Create and activate environment
+conda create -n moodflix python=3.10 -y
+conda activate moodflix
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Run Backend
 python src_backend/main.py
 ```
 
 #### **Frontend Setup**
 ```bash
+# Install dependencies
 bun install  # or npm install
+
+# Run Frontend
 bun dev      # or npm run dev
 ```
 
